@@ -1,9 +1,7 @@
 class Solution {
 public:
     
-    
-    class BuildingPoints{
-        public:
+    struct BuildingPoints{
         int x;
         int y;
         bool isStart;
@@ -13,67 +11,41 @@ public:
             y = input_y;
             isStart = input_isStart;
         }
-        
-        bool operator<(BuildingPoints o){
-            if (this->x != o.x){
-                return this->x - o.x;
+    };
+    
+    // ERROR comparator could be more efficient!
+    struct customComp{
+        bool operator()(const BuildingPoints & building1, const BuildingPoints &building2){
+            if(building1.x == building2.x){
+                // if buildings are the same height
+                if(building1.y == building2.y){
+                    if(building1.isStart){
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
+                }
+                // both points are starting points
+                else if(building1.isStart && building2.isStart){
+                    return building1.y > building2.y;
+                }
+                // both points are ending points
+                else if(!building1.isStart && !building2.isStart){
+                    return building1.y < building2.y;
+                }
+                else if (building1.isStart && !building2.isStart){
+                    return building1.y > building2.y;
+                }
+                else{
+                    return building1.y < building2.y;
+                }
             }
             else{
-                return (this->isStart ? -this->y : this->y) - (o.isStart ? -o.y : o.y);
+                return building1.x < building2.x;
             }
         }
     };
-    
-    
-    
-    
-    
-    
-//     struct BuildingPoints{
-//         int x;
-//         int y;
-//         bool isStart;
-        
-//         BuildingPoints(int input_x, int input_y, bool input_isStart) {
-//             x = input_x;
-//             y = input_y;
-//             isStart = input_isStart;
-//         }
-//     };
-    
-//     // potiential error: < and > might be wrong
-//     struct customComp{
-//         bool operator()(const BuildingPoints & building1, const BuildingPoints &building2){
-//             if(building1.x == building2.x){
-//                 // if buildings are the same height
-//                 if(building1.y == building2.y){
-//                     if(building1.isStart){
-//                         return true;
-//                     }
-//                     else{
-//                         return false;
-//                     }
-//                 }
-//                 // both points are starting points
-//                 else if(building1.isStart && building2.isStart){
-//                     return building1.y > building2.y;
-//                 }
-//                 // both points are ending points
-//                 else if(!building1.isStart && !building2.isStart){
-//                     return building1.y < building2.y;
-//                 }
-//                 else if (building1.isStart && !building2.isStart){
-//                     return building1.y > building2.y;
-//                 }
-//                 else{
-//                     return building1.y < building2.y;
-//                 }
-//             }
-//             else{
-//                 return building1.x < building2.x;
-//             }
-//         }
-//     };
     
     vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
         vector<vector<int>> res;
@@ -96,14 +68,8 @@ public:
             buildingPointsVec.push_back(BuildingPoints(xend, height, false));
         }
         
-        sort(buildingPointsVec.begin(), buildingPointsVec.end());
+        sort(buildingPointsVec.begin(), buildingPointsVec.end(), customComp());
         
-        
-        for(int i = 0; i < buildingPointsVec.size(); i++){
-            cout << "x: " << buildingPointsVec[i].x << " y: " << buildingPointsVec[i].y << " start: " << buildingPointsVec[i].isStart << endl;
-        }
-        
-        // priority_queue<int> pq;
         
         
         
@@ -129,7 +95,23 @@ public:
                     push_this.push_back(currBld.x);
                     // push y second
                     push_this.push_back(currBld.y);
-                    res.push_back(push_this);
+                    
+                    
+                    // FIX "ERROR": shouldnt need this step, fix the comparator
+                    if(res.size() >0){
+                        if(res.back()[0] == currBld.x && res.back()[1] < currBld.y){
+                            res.back()[1] = currBld.y;
+                        }
+                        else{
+                            res.push_back(push_this);
+                        }
+                    }
+                    else{
+                        res.push_back(push_this);
+                    }
+                    
+                    
+                    
                 }
             }
             // if end
