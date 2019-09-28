@@ -1,7 +1,9 @@
 class Solution {
 public:
     
-    struct BuildingPoints{
+    
+    class BuildingPoints{
+        public:
         int x;
         int y;
         bool isStart;
@@ -11,31 +13,67 @@ public:
             y = input_y;
             isStart = input_isStart;
         }
-    };
-    
-    struct customComp{
-        bool operator()(const BuildingPoints & building1, const BuildingPoints &building2){
-            if(building1.x == building2.x){
-                // both points are starting points
-                if(building1.isStart && building2.isStart){
-                    return building1.y > building2.y;
-                }
-                // both points are ending points
-                else if(!building1.isStart && !building2.isStart){
-                    return building1.y < building2.y;
-                }
-                else if (building1.isStart && !building2.isStart){
-                    return building1.y > building2.y;
-                }
-                else{
-                    return building1.y < building2.y;
-                }
+        
+        bool operator<(BuildingPoints o){
+            if (this->x != o.x){
+                return this->x - o.x;
             }
             else{
-                return building1.x < building2.x;
+                return (this->isStart ? -this->y : this->y) - (o.isStart ? -o.y : o.y);
             }
         }
     };
+    
+    
+    
+    
+    
+    
+//     struct BuildingPoints{
+//         int x;
+//         int y;
+//         bool isStart;
+        
+//         BuildingPoints(int input_x, int input_y, bool input_isStart) {
+//             x = input_x;
+//             y = input_y;
+//             isStart = input_isStart;
+//         }
+//     };
+    
+//     // potiential error: < and > might be wrong
+//     struct customComp{
+//         bool operator()(const BuildingPoints & building1, const BuildingPoints &building2){
+//             if(building1.x == building2.x){
+//                 // if buildings are the same height
+//                 if(building1.y == building2.y){
+//                     if(building1.isStart){
+//                         return true;
+//                     }
+//                     else{
+//                         return false;
+//                     }
+//                 }
+//                 // both points are starting points
+//                 else if(building1.isStart && building2.isStart){
+//                     return building1.y > building2.y;
+//                 }
+//                 // both points are ending points
+//                 else if(!building1.isStart && !building2.isStart){
+//                     return building1.y < building2.y;
+//                 }
+//                 else if (building1.isStart && !building2.isStart){
+//                     return building1.y > building2.y;
+//                 }
+//                 else{
+//                     return building1.y < building2.y;
+//                 }
+//             }
+//             else{
+//                 return building1.x < building2.x;
+//             }
+//         }
+//     };
     
     vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
         vector<vector<int>> res;
@@ -58,16 +96,69 @@ public:
             buildingPointsVec.push_back(BuildingPoints(xend, height, false));
         }
         
-        sort(buildingPointsVec.begin(), buildingPointsVec.end(), customComp());
+        sort(buildingPointsVec.begin(), buildingPointsVec.end());
         
         
         for(int i = 0; i < buildingPointsVec.size(); i++){
             cout << "x: " << buildingPointsVec[i].x << " y: " << buildingPointsVec[i].y << " start: " << buildingPointsVec[i].isStart << endl;
         }
         
-        priority_queue<int> pq;
+        // priority_queue<int> pq;
+        
+        
+        
+        // print out mp to verify
+        map<int,int> mp;
+        
+        int max_val = 0;
+        // initalizing the map with 0
+        mp[0]++;
+        
+        for(int i = 0 ; i < buildingPointsVec.size(); i++){
+            // if start
+            BuildingPoints currBld = buildingPointsVec[i];
             
-        // print out pq to verify
+            if(currBld.isStart){
+                //potiental error //value might be undefined
+                mp[currBld.y]++;
+                // change max val
+                if(currBld.y > max_val){
+                    max_val = currBld.y;
+                    vector<int> push_this;
+                    // push x first
+                    push_this.push_back(currBld.x);
+                    // push y second
+                    push_this.push_back(currBld.y);
+                    res.push_back(push_this);
+                }
+            }
+            // if end
+            else{
+                if(mp.find(currBld.y) != mp.end()){
+                    // remove it from the map
+                    if(mp.find(currBld.y)->second == 1){
+                        mp.erase(mp.find(currBld.y));
+                    }
+                    else{
+                        mp[currBld.y]--;
+                    }
+                    
+                    // if the max changes then it needs to be in the final result
+                    if(mp.rbegin()->first != max_val){
+                        max_val = mp.rbegin()->first;
+                        vector<int> push_this;
+                        // push x first
+                        push_this.push_back(currBld.x);
+                        // push y second
+                        push_this.push_back(max_val);
+                        
+                        res.push_back(push_this);
+                    }
+                    
+                }
+            }
+        }
+        
         
         return res;
     }
