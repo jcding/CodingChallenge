@@ -61,6 +61,10 @@ public:
         sort(buildingPointsVec.begin(), buildingPointsVec.end(), customComp());
         
         
+        for(int i = 0; i < buildingPointsVec.size(); i++){
+            cout << "x: " << buildingPointsVec[i].x << " y: " << buildingPointsVec[i].y << " start: " << buildingPointsVec[i].isStart << endl;
+        }
+        
         priority_queue<int> pq;
             
         // print out pq to verify
